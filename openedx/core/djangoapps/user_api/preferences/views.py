@@ -16,6 +16,7 @@ from edx_rest_framework_extensions.auth.session.authentication import SessionAut
 from openedx.core.lib.api.authentication import OAuth2AuthenticationAllowInactiveUser
 from openedx.core.lib.api.parsers import MergePatchParser
 from openedx.core.lib.api.permissions import IsUserInUrlOrStaff
+from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from ..errors import UserNotFound, UserNotAuthorized, PreferenceValidationError, PreferenceUpdateError
 from .api import (
     get_user_preference, get_user_preferences, set_user_preference, update_user_preferences, delete_user_preference
@@ -83,7 +84,7 @@ class PreferencesView(APIView):
             If the update is successful, an HTTP 204 "No Content" response is
             returned with no additional content.
     """
-    authentication_classes = (OAuth2AuthenticationAllowInactiveUser, SessionAuthenticationAllowInactiveUser)
+    authentication_classes = (OAuth2AuthenticationAllowInactiveUser, JwtAuthentication, SessionAuthenticationAllowInactiveUser)
     permission_classes = (permissions.IsAuthenticated, IsUserInUrlOrStaff)
     parser_classes = (MergePatchParser,)
 

@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-from openedx.core.djangoapps.oauth_dispatch.jwt import create_jwt_for_user
+from openedx.core.djangoapps.oauth_dispatch.jwt import _create_jwt
 from student.models import UserProfile
 from student.views import compose_and_send_activation_email
 import third_party_auth
@@ -121,30 +121,10 @@ def post_to_custom_auth_form(request):
 def saml_to_jwt_token(request):
     if request.user.is_anonymous:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-    jwt = create_jwt_for_user(request.user)
+    expires_in = settings.OAUTH_ID_TOKEN_EXPIRATION
+    jwt = _create_jwt(request.user, expires_in=expires_in, scopes=["read","write","email","profile","grades:read","certificates:read"])
     data = {
         'access_token': jwt,
         'token_type': 'JWT',
     }
     return Response(data, status=status.HTTP_200_OK)
-
-
-@csrf_exempt
-@api_view(('GET',))
-def saml_providers_view(request):
-    providers = []
-    if third_party_auth.is_enabled():
-        for enabled in third_party_auth.provider.Registry.displayed_for_login(tpa_hint="saml"):
-            info = {
-                "id": enabled.provider_id,
-                "name": enabled.name,
-                "iconClass": enabled.icon_class or None,
-                "iconImage": enabled.icon_image.url if enabled.icon_image else None,
-                "loginUrl": pipeline.get_login_url(
-                    enabled.provider_id,
-                    pipeline.AUTH_ENTRY_LOGIN,
-                    redirect_url="/auth/saml/access_token/",
-                ),
-            }
-            providers.append(info)
-    return Response({"providers": providers}, status=status.HTTP_200_OK)

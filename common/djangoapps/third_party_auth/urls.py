@@ -3,7 +3,7 @@
 from django.conf.urls import include, url
 
 from .views import inactive_user_view, lti_login_and_complete_view, post_to_custom_auth_form, saml_metadata_view, \
-    saml_to_jwt_token, saml_providers_view
+    saml_to_jwt_token
 
 urlpatterns = [
     url(r'^auth/inactive', inactive_user_view, name="third_party_inactive_redirect"),
@@ -12,5 +12,4 @@ urlpatterns = [
     url(r'^auth/login/(?P<backend>lti)/$', lti_login_and_complete_view),
     url(r'^auth/', include('social_django.urls', namespace='social')),
     url(r'^auth/saml/access_token', saml_to_jwt_token),
-    url(r'^auth/saml/providers', saml_providers_view)
 ]
